@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "LabBox"
+version = "0.1.0"
+description = "Oxford University Hospital application to store information and metadata about Specimens, Samples taken from Specimens, Storage location information for the Specimens, sequencing Runs of Samples and Analysis of the sequencing Runs."
+authors = [
+    {name = "Marc Brouard", email = "brouard.marc@gmail.com"},
+]
+requires-python = ">=3.12.0"
+readme = "README.md"
+classifiers = [
+    "Framework :: FastAPI",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "fastapi",
+    "python-jose",
+    "httpx",
+    "asyncpg",
+    "sqlalchemy[asyncio]",
+    "sqlalchemy_utils",
+    "sqlalchemy-Continuum",
+    "typing-extensions",
+    "types-python-dateutil",
+    "python-dotenv",
+    "iso3166",
+    "pydantic",
+    "pyjwt[crypto]",
+    "python-multipart",
+]
+
+[project.optional-dependencies]
+dev = [
+    "alembic",
+    "astor",
+    "iPython",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pytest-postgresql",
+    "ruff",
+    "uvicorn",
+]
+
+[tool.mypy]
+disable_error_code = ["func-returns-value"]
