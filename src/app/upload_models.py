@@ -24,6 +24,9 @@ class ImportModel(BaseModel):
         if key in self.__dict__:
             self.__dict__[key] = value
 
+    def get(self, key, default=None):
+        return self.__dict__.get(key, default)
+
 
 class RunImport(ImportModel):
     code: ExcelStr = Field(max_length=20)

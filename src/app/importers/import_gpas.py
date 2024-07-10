@@ -1,21 +1,21 @@
-from logging import Logger
 from typing import Any, Dict, List
 
 from app import models
 from app.constants import tb_drugs
+from app.logs import CustomLogger
 from app.upload_models import GpasSummary, Mutations
 from app.utils.utils import merge_lists
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def import_summary(
-    session: Session,
+    session: AsyncSession,
     Summary: List[Dict[str, Any]],
     Mapping: List[Dict[str, Any]],
-    logger: Logger,
+    logger: CustomLogger,
     dryrun: bool = False,
 ):
     logger.info(
@@ -64,21 +64,21 @@ async def import_summary(
         logger.error(f"Failed to upload data: {e}")
 
     if logger.error_occurred:
-        session.rollback()
+        await session.rollback()
         logger.error("Upload failed, please see log messages for details")
         return False
 
     if dryrun:
         logger.info("Dry run mode, no data was uploaded")
-        session.rollback()
+        await session.rollback()
     else:
         logger.info("Data uploaded successfully")
-        session.commit()
+        await session.commit()
 
     return True
 
 
-async def find_samples(session: Session, guid: str) -> models.Sample:
+async def find_samples(session: AsyncSession, guid: str) -> models.Sample:
     result = await session.execute(
         select(models.Sample).filter(models.Sample.guid == guid)
     )
@@ -89,11 +89,11 @@ async def find_samples(session: Session, guid: str) -> models.Sample:
 
 
 async def analysis(
-    session: Session,
+    session: AsyncSession,
     row_model: GpasSummary | Mutations,
     index: int,
     dryrun: bool,
-    logger: Logger,
+    logger: CustomLogger,
 ):
     sample = await find_samples(session, row_model.sample_name)
     result = await session.execute(
@@ -119,12 +119,12 @@ async def analysis(
 
 
 async def speciation(
-    session: Session,
+    session: AsyncSession,
     gpas_summary: GpasSummary,
     index: int,
     dryrun: bool,
     analysis_record: models.Analysis,
-    logger: Logger,
+    logger: CustomLogger,
 ):
     if gpas_summary.species is None:
         logger.info(
@@ -160,12 +160,12 @@ async def speciation(
 
 
 async def drugs(
-    session: Session,
+    session: AsyncSession,
     gpas_summary: GpasSummary,
     index: int,
     dryrun: bool,
     analysis_record: models.Analysis,
-    logger: Logger,
+    logger: CustomLogger,
 ):
     if gpas_summary.resistance_prediction is None:
         logger.info(
@@ -195,7 +195,7 @@ async def drugs(
 
 
 async def details(
-    sesion: Session, gpas_summary: GpasSummary, analysis_record: models.Analysis
+    sesion: AsyncSession, gpas_summary: GpasSummary, analysis_record: models.Analysis
 ):
     result = await sesion.execute(select(models.OtherType))
     other_types = result.scalars().all()
@@ -211,7 +211,7 @@ async def details(
 
         if value is None:
             if other_record:
-                sesion.delete(other_record)
+                await sesion.delete(other_record)
             continue
 
         if not other_record:
@@ -219,16 +219,16 @@ async def details(
                 analysis=analysis_record,
                 other_type_code=other_type.code,
             )
-            sesion.add(other_record)
+            await sesion.add(other_record)
 
         other_record["value" + other_type.value_type] = value
 
 
 async def import_mutation(
-    session: Session,
+    session: AsyncSession,
     Mutation: List[Dict[str, Any]],
     Mapping: List[Dict[str, Any]],
-    logger: Logger,
+    logger: CustomLogger,
     dryrun: bool = False,
 ):
     """upload data from a mutation csv"""
@@ -266,27 +266,27 @@ async def import_mutation(
         logger.error(f"Failed to upload data: {e}")
 
     if logger.error_occurred:
-        session.rollback()
+        await session.rollback()
         logger.error("Upload failed, please see log messages for details")
         return False
 
     if dryrun:
         logger.info("Dry run mode, no data was uploaded")
-        session.rollback()
+        await session.rollback()
     else:
         logger.info("Data uploaded successfully")
-        session.commit()
+        await session.commit()
 
     return True
 
 
 async def mutation(
-    session: Session,
+    session: AsyncSession,
     mutation: Mutations,
     index: int,
     dryrun: bool,
     analysis_record: models.Analysis,
-    logger: Logger,
+    logger: CustomLogger,
 ) -> models.Mutations | None:
     result = await session.execute(
         select(models.Mutations)
