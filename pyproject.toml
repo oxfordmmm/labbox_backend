@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "alembic",
     "fastapi",
     "python-jose",
     "httpx",
@@ -30,19 +31,18 @@ dependencies = [
     "pydantic",
     "pyjwt[crypto]",
     "python-multipart",
+    "uvicorn",
+    "astor",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "alembic",
-    "astor",
     "iPython",
     "mypy",
     "pytest",
     "pytest-cov",
     "pytest-postgresql",
     "ruff",
-    "uvicorn",
 ]
 
 [tool.mypy]

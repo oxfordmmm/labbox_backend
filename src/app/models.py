@@ -24,7 +24,7 @@ from app.constants import (
 from app.db import Model
 from app.upload_models import ImportModel
 
-make_versioned(user_cls=None)
+make_versioned(user_cls=None)  # type: ignore
 
 
 class GpasLocalModel(Model):
@@ -192,7 +192,7 @@ class Sample(GpasLocalModel):
     )
 
     @hybrid_property
-    def nucleic_acid_type(self):
+    def nucleic_acid_type(self):  # type: ignore
         return self._nucleic_acid_type
 
     @nucleic_acid_type.setter  # type: ignore

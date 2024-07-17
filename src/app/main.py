@@ -1,3 +1,4 @@
+import logging
 from os import cpu_count
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from app.config import config
+from app.db import run_alembic_upgrade_to_head
 from app.logs import add_json_handler
 from app.routes.mutation_routes import router as mutation_router
 from app.routes.schema_routes import router as schema_router
@@ -59,7 +61,11 @@ async def favicon() -> FileResponse:
     Returns:
         FileResponse: The favicon.ico file
     """
-    return FileResponse("src/app/assets/images/favicon/favicon.ico")
+    current_file_path = Path(__file__).resolve()
+    favicon_path = (
+        current_file_path.parent / "assets" / "images" / "favicon" / "favicon.ico"
+    )
+    return FileResponse(str(favicon_path))
 
 
 @app.get("/private")
@@ -114,6 +120,18 @@ def get_cpu_limit() -> int:
 
 
 if __name__ == "__main__":
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+
+    # Run Alembic migrations before starting the server
+    try:
+        run_alembic_upgrade_to_head()
+    except Exception:
+        logging.error(
+            "Failed to complete database migrations. Application will not start."
+        )
+        exit(1)
+
     worker_count = get_cpu_limit()
     if worker_count is not None:
         worker_count = worker_count * 2 + 1
@@ -122,6 +140,6 @@ if __name__ == "__main__":
         "main:app",
         host=config.HOST,
         port=int(config.PORT),
-        log_level="trace",  # TODO: Change to 'info' in production
+        log_level="info",
         workers=worker_count,
     )
