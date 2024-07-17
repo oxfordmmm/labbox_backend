@@ -67,10 +67,9 @@ async def import_runs(
         try:
             run_import = RunImport(**row)
 
-            result = await session.execute(
+            run_record: models.Run | None = await session.scalar(
                 select(models.Run).filter(models.Run.code == run_import.code)
             )
-            run_record = result.scalars().first()
             if run_record:
                 logger.info(
                     f"Runs Sheet Row {index+2}: Run {run_import.code} already exists{'' if dryrun else ', updating'}"
@@ -106,13 +105,13 @@ async def import_specimens(
             # get the specimen owner
             owner_record = await owner(session, index, specimen_import, logger, dryrun)
 
-            result = await session.execute(
-                select(models.Specimen).filter(
-                    models.Specimen.accession == specimen_import.accession,
-                    models.Specimen.collection_date == specimen_import.collection_date,
+            specimen_record: models.Specimen | None = await session.scalar(
+                select(models.Specimen)
+                .filter(models.Specimen.accession == specimen_import.accession)
+                .filter(
+                    models.Specimen.collection_date == specimen_import.collection_date
                 )
             )
-            specimen_record = result.scalars().first()
             if specimen_record:
                 logger.info(
                     f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} already exists{'' if dryrun else ', updating'}"
@@ -148,13 +147,12 @@ async def owner(
     logger: CustomLogger,
     dryrun: bool,
 ) -> models.Owner:
-    result = await session.execute(
-        select(models.Owner).filter(
-            models.Owner.site == specimen_import.owner_site,
-            models.Owner.user == specimen_import.owner_user,
-        )
+    owner_record: models.Owner | None = await session.scalar(
+        select(models.Owner)
+        .filter(models.Owner.site == specimen_import.owner_site)
+        .filter(models.Owner.user == specimen_import.owner_user)
+        .limit(1)
     )
-    owner_record = result.scalars().first()
     if not owner_record:
         owner_record = models.Owner(
             site=specimen_import.owner_site, user=specimen_import.owner_user
@@ -177,15 +175,15 @@ async def specimen_detail(
     for specimen_detail_type in specimen_detail_types.scalars().all():
         value = specimen_import[specimen_detail_type.code]
 
-        result = await session.execute(
-            select(models.SpecimenDetail).filter(
-                models.SpecimenDetail.specimen == specimen_record,
+        specimen_detail_record: models.SpecimenDetail | None = await session.scalar(
+            select(models.SpecimenDetail)
+            .filter(models.SpecimenDetail.specimen == specimen_record)
+            .filter(
                 models.SpecimenDetail.specimen_detail_type_code
-                == specimen_detail_type.code,
+                == specimen_detail_type.code
             )
+            .limit(1)
         )
-
-        specimen_detail_record = result.scalars().first()
 
         if value is None:
             if specimen_detail_record:
@@ -217,12 +215,11 @@ async def import_samples(
                 session, sample_import.accession, sample_import.collection_date
             )
 
-            result = await session.execute(
-                select(models.Sample).filter(
-                    models.Sample.guid == sample_import.guid,
-                )
+            sample_record: models.Sample | None = await session.scalar(
+                select(models.Sample)
+                .filter(models.Sample.guid == sample_import.guid)
+                .limit(1)
             )
-            sample_record = result.scalars().first()
 
             if sample_record:
                 logger.info(
@@ -254,10 +251,9 @@ async def import_samples(
 
 
 async def find_run(session: AsyncSession, run_code: str) -> models.Run:
-    result = await session.execute(
-        select(models.Run).filter(models.Run.code == run_code)
+    run_record: models.Run | None = await session.scalar(
+        select(models.Run).filter(models.Run.code == run_code).limit(1)
     )
-    run_record = result.scalars().first()
     if not run_record:
         raise ValueError(f"Run {run_code} not found")
     return run_record
@@ -266,13 +262,12 @@ async def find_run(session: AsyncSession, run_code: str) -> models.Run:
 async def find_specimen(
     session: AsyncSession, accession: str, collection_date: date
 ) -> models.Specimen:
-    result = await session.execute(
-        select(models.Specimen).filter(
-            models.Specimen.accession == accession,
-            models.Specimen.collection_date == collection_date,
-        )
+    specimen_record: models.Specimen | None = await session.scalar(
+        select(models.Specimen)
+        .filter(models.Specimen.accession == accession)
+        .filter(models.Specimen.collection_date == collection_date)
+        .limit(1)
     )
-    specimen_record = result.scalars().first()
     if not specimen_record:
         raise ValueError(f"Specimen {accession}, {collection_date} not found")
     return specimen_record
@@ -286,14 +281,14 @@ async def sample_detail(
     for sample_detail_type in sample_detail_types.scalars().all():
         value = sample_import[sample_detail_type.code]
 
-        result = await session.execute(
-            select(models.SampleDetail).filter(
-                models.SampleDetail.sample == sample_record,
-                models.SampleDetail.sample_detail_type_code == sample_detail_type.code,
+        sample_detail_record: models.SampleDetail | None = await session.scalar(
+            select(models.SampleDetail)
+            .filter(models.SampleDetail.sample == sample_record)
+            .filter(
+                models.SampleDetail.sample_detail_type_code == sample_detail_type.code
             )
+            .limit(1)
         )
-
-        sample_detail_record = result.scalars().first()
 
         if value is None:
             if sample_detail_record:
@@ -347,13 +342,12 @@ async def spikes(
             logger.error(f"Samples Sheet Row {index+2} : Spike name is required")
             continue
 
-        result = await session.execute(
-            select(models.Spike).filter(
-                models.Spike.sample == sample_record,
-                models.Spike.name == spike_name,
-            )
+        spike_record: models.Spike | None = await session.scalar(
+            select(models.Spike)
+            .filter(models.Spike.sample == sample_record)
+            .filter(models.Spike.name == spike_name)
+            .limit(1)
         )
-        spike_record = result.scalars().first()
 
         if not spike_record:
             spike_record = models.Spike(sample=sample_record, name=spike_name)
@@ -363,13 +357,11 @@ async def spikes(
 
         clean_spike_names = [x for x in spikes_names.values() if not is_none_or_nan(x)]
 
-        result = await session.execute(
-            select(models.Spike).filter(
-                not_(models.Spike.name.in_(clean_spike_names)),
-                models.Spike.sample == sample_record,
-            )
+        rs_to_delete = await session.scalars(
+            select(models.Spike)
+            .filter(not_(models.Spike.name.in_(clean_spike_names)))
+            .filter(models.Spike.sample == sample_record)
         )
-        rs_to_delete = result.scalars().all()
         for record in rs_to_delete:
             await session.delete(record)
 
@@ -388,12 +380,13 @@ async def import_storage(
                 session, storage_import.accession, storage_import.collection_date
             )
 
-            result = await session.execute(
-                select(models.Storage).filter(
-                    models.Storage.storage_qr_code == storage_import.storage_qr_code,
+            storage_record: models.Storage | None = await session.scalar(
+                select(models.Storage)
+                .filter(
+                    models.Storage.storage_qr_code == storage_import.storage_qr_code
                 )
+                .limit(1)
             )
-            storage_record = result.scalars().first()
 
             if storage_record:
                 logger.info(

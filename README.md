@@ -59,12 +59,37 @@ to commit this file in addition to your migration files.
 ## Running the backend
 
 You can then run the backend using the following command or use the debugger in
-VS Code, which should be setup
+VS Code, which should be setup as "Run Uvicorn Directly". Running using the
+VSCode setup will run with increased logging level "Trace".
 
 ```bash
-python3 ./src/app/main.py
+PYTHONPATH=$PWD/src python3 ./src/app/main.py
 ```
+
+Please note running using the above command will run with production settings
+from `main.py`.
 
 Please note the backend is set up to run under port 8000. If this port is in use
 on your system you will need to modify the `.env` file in the backend and the
 server:proxy:target setting in the `vite.config.ts` file in the frontend.
+
+## .env file
+
+The `.env` file contains the secrets for the application, including Auth0 and
+database connection information. Do not copy this file to GitHub or anywhere
+else public. A template `.env.example` is provided as a base to create the
+`.env` file on you local machine.
+
+## Running in docker
+
+A `Dockerfile` is provided. If you build the container locally, it will contain
+your `.env`, so the container should not be uploaded to any container registry.
+GitHub actions are provided to build the container on release and copy to GitHub
+container registry, this will then not ctain the `.env` file.`
+
+## Debugging into Docker
+
+A `docker-compose.debug.yml` file is provided to allow the running of the
+back-end in a docker container and allow debugging. In VSCode this can be right
+clicked and `compose up` command chosen. A VSCode debugger profile is provided
+"Python: Remote Attach" to attach to the docker container.
