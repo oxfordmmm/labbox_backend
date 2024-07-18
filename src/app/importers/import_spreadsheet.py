@@ -1,24 +1,24 @@
 import re
 from datetime import date
-from logging import Logger
 from typing import Any, Dict, List
 
 import app.models as models
+from app.logs import CustomLogger
 from app.upload_models import RunImport, SamplesImport, SpecimensImport, StoragesImport
 from app.utils.utils import is_none_or_nan
 from pydantic import ValidationError
 from sqlalchemy import not_, select
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def import_data(
-    session: Session,
+    session: AsyncSession,
     Runs: List[Dict[str, Any]],
     Specimens: List[Dict[str, Any]],
     Samples: List[Dict[str, Any]],
     Storage: List[Dict[str, Any]],
-    logger: Logger,
+    logger: CustomLogger,
     dryrun: bool = False,
 ) -> bool:
     logger.info(
@@ -58,7 +58,10 @@ async def import_data(
 
 
 async def import_runs(
-    session: Session, data: List[Dict[str, Any]], logger: Logger, dryrun: bool = False
+    session: AsyncSession,
+    data: List[Dict[str, Any]],
+    logger: CustomLogger,
+    dryrun: bool = False,
 ):
     for index, row in enumerate(data):
         try:
@@ -91,7 +94,10 @@ async def import_runs(
 
 
 async def import_specimens(
-    session: Session, data: List[Dict[str, Any]], logger: Logger, dryrun: bool = False
+    session: AsyncSession,
+    data: List[Dict[str, Any]],
+    logger: CustomLogger,
+    dryrun: bool = False,
 ):
     for index, row in enumerate(data):
         try:
@@ -136,10 +142,10 @@ async def import_specimens(
 
 
 async def owner(
-    session: Session,
+    session: AsyncSession,
     index: int,
     specimen_import: SpecimensImport,
-    logger: Logger,
+    logger: CustomLogger,
     dryrun: bool,
 ) -> models.Owner:
     result = await session.execute(
@@ -161,10 +167,10 @@ async def owner(
 
 
 async def specimen_detail(
-    session: Session,
+    session: AsyncSession,
     specimen_record: models.Specimen,
     specimen_import: SpecimensImport,
-    logger: Logger,
+    logger: CustomLogger,
 ) -> None:
     specimen_detail_types = await session.execute(select(models.SpecimenDetailType))
 
@@ -197,7 +203,10 @@ async def specimen_detail(
 
 
 async def import_samples(
-    session: Session, data: List[Dict[str, Any]], logger: Logger, dryrun: bool = False
+    session: AsyncSession,
+    data: List[Dict[str, Any]],
+    logger: CustomLogger,
+    dryrun: bool = False,
 ):
     for index, row in enumerate(data):
         try:
@@ -244,7 +253,7 @@ async def import_samples(
             logger.error(f"Samples Sheet Row {index+2} : {err}")
 
 
-async def find_run(session: Session, run_code: str) -> models.Run:
+async def find_run(session: AsyncSession, run_code: str) -> models.Run:
     result = await session.execute(
         select(models.Run).filter(models.Run.code == run_code)
     )
@@ -255,7 +264,7 @@ async def find_run(session: Session, run_code: str) -> models.Run:
 
 
 async def find_specimen(
-    session: Session, accession: str, collection_date: date
+    session: AsyncSession, accession: str, collection_date: date
 ) -> models.Specimen:
     result = await session.execute(
         select(models.Specimen).filter(
@@ -270,7 +279,7 @@ async def find_specimen(
 
 
 async def sample_detail(
-    session: Session, sample_record: models.Sample, sample_import: SamplesImport
+    session: AsyncSession, sample_record: models.Sample, sample_import: SamplesImport
 ) -> None:
     sample_detail_types = await session.execute(select(models.SampleDetailType))
 
@@ -302,11 +311,11 @@ async def sample_detail(
 
 
 async def spikes(
-    session: Session,
+    session: AsyncSession,
     sample_record: models.Sample,
     sample_import: SamplesImport,
     index: int,
-    logger: Logger,
+    logger: CustomLogger,
 ) -> None:
     spikes_names: dict = {
         k: v
@@ -329,8 +338,8 @@ async def spikes(
     suffixes = list(set(suffixes))
 
     for i in suffixes:
-        spike_name: str = sample_import[f"spike_name_{i}"]
-        spike_quantity: str = sample_import[f"spike_quantity_{i}"]
+        spike_name: str = sample_import.get(f"spike_name_{i}", "")
+        spike_quantity: str = sample_import.get(f"spike_quantity_{i}", "")
 
         if is_none_or_nan(spike_name) or is_none_or_nan(spike_quantity):
             continue
@@ -353,20 +362,22 @@ async def spikes(
         spike_record.quantity = spike_quantity
 
         clean_spike_names = [x for x in spikes_names.values() if not is_none_or_nan(x)]
-        await session.execute(
-            select(models.Spike)
-            .filter(
+
+        result = await session.execute(
+            select(models.Spike).filter(
                 not_(models.Spike.name.in_(clean_spike_names)),
                 models.Spike.sample == sample_record,
             )
-            .delete()
         )
+        rs_to_delete = result.scalars().all()
+        for record in rs_to_delete:
+            await session.delete(record)
 
 
 async def import_storage(
-    session: Session,
+    session: AsyncSession,
     data: List[Dict[str, Any]],
-    logger: Logger,
+    logger: CustomLogger,
     dryrun: bool = False,
 ):
     for index, row in enumerate(data):

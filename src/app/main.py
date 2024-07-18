@@ -63,7 +63,7 @@ async def favicon() -> FileResponse:
 
 
 @app.get("/private")
-async def private(auth_result: str = Security(auth.verify)) -> dict:
+async def private(auth_result: str = Security(auth.verify)) -> str:
     """Protected test end point that requires authentication
 
     Args:
@@ -122,7 +122,6 @@ if __name__ == "__main__":
         "main:app",
         host=config.HOST,
         port=int(config.PORT),
-        reload=True,
         log_level="trace",  # TODO: Change to 'info' in production
         workers=worker_count,
     )
