@@ -82,15 +82,17 @@ else public. A template `.env.example` is provided as a base to create the
 
 ## Running in docker
 
-A `Dockerfile` is provided. If you build the container locally, it will contain
-your `.env`, so the container should not be uploaded to any container registry.
-GitHub actions are provided to build the container on release and copy to GitHub
-container registry, this will then not contain the `.env` file. NOTE if you are
-running the database on your local machine, you are not able to use `localhost`
-or `127.0.0.1` for the `DATABASE_HOST` entry in the `.env` file. Instead use
-`host.docker.internal` for the `DATABASE_HOST` entry in your `.env` file. If you
-also want the `.env` file to work when running locally outside of a docker
-container you will need to edit your `hosts` file to point
+~~A `Dockerfile` is provided. If you build the container locally, it will
+contain your `.env`, so the container should not be uploaded to any container
+registry.  GitHub actions are provided to build the container on release and
+copy to GitHub container registry, this will then not contain the `.env` file.~~
+A `.dockerignore` file is now provided that should make this irrelevant.
+
+NOTE if you are running the database on your local machine, you are not able to
+use `localhost` or `127.0.0.1` for the `DATABASE_HOST` entry in the `.env` file.
+Instead use `host.docker.internal` for the `DATABASE_HOST` entry in your `.env`
+file. If you also want the `.env` file to work when running locally, not in a
+docker container, you will need to edit your `hosts` file to point
 `host.docker.internal` at your local machine.
 
 ## Debugging into Docker
