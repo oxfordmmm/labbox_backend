@@ -35,9 +35,11 @@ ignored_views = [
     "flattened_others_view",
 ]
 
-engine: AsyncEngine = create_async_engine(
-    config.get_main_option("sqlalchemy.url"), pool_size=10, max_overflow=20
-)
+sqlalchemy_url = config.get_main_option("sqlalchemy.url")
+if sqlalchemy_url is None:
+    raise ValueError("Database URL must not be None.")
+
+engine: AsyncEngine = create_async_engine(sqlalchemy_url, pool_size=10, max_overflow=20)
 
 
 def include_object(object, name, type_, reflected, compare_to):
@@ -96,7 +98,7 @@ def do_run_migrations(connection: Connection) -> None:
             and isinstance(node.target, ast.Name)
             and node.target.id == "__dbrevision__"
         ):
-            node.value = ast.Str(s=head_revision)
+            node.value = ast.Constant(value=head_revision)
 
     with open("src/app/__init__.py", "w") as f:
         f.write(astor.to_source(tree))

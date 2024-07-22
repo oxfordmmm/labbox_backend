@@ -79,10 +79,9 @@ async def import_summary(
 
 
 async def find_samples(session: AsyncSession, guid: str) -> models.Sample:
-    result = await session.execute(
-        select(models.Sample).filter(models.Sample.guid == guid)
+    sample: models.Sample | None = await session.scalar(
+        select(models.Sample).filter(models.Sample.guid == guid).limit(1)
     )
-    sample = result.scalars().first()
     if not sample:
         raise ValueError(f"Sample guid {guid} does not exist")
     return sample
@@ -96,13 +95,14 @@ async def analysis(
     logger: CustomLogger,
 ):
     sample = await find_samples(session, row_model.sample_name)
-    result = await session.execute(
+    analysis: models.Analysis | None = await session.scalar(
         select(models.Analysis)
         .filter(models.Analysis.sample_id == sample.id)
         .filter(models.Analysis.batch_name == row_model.batch)
+        .limit(1)
     )
 
-    if analysis := (result.scalars().first()):
+    if analysis:
         analysis.assay_system = "GPAS TB"
     else:
         analysis = models.Analysis(
@@ -132,14 +132,14 @@ async def speciation(
         )
         return None
 
-    speciation = None
+    speciation: models.Speciation | None = None
     if analysis_record and analysis_record.id:
-        result = await session.execute(
+        speciation = await session.scalar(
             select(models.Speciation)
-            .filter(models.Speciation.analysis == analysis_record)
+            .filter(models.Speciation.analysis_id == analysis_record.id)
             .filter(models.Speciation.species_number == 1)
+            .limit(1)
         )
-        speciation = result.scalars().first()
 
     if not speciation:
         speciation = models.Speciation(analysis=analysis_record, species_number=1)
@@ -174,12 +174,13 @@ async def drugs(
         return
 
     for key, value in tb_drugs.items():
-        result = await session.execute(
+        drug_resistance: models.DrugResistance | None = await session.scalar(
             select(models.DrugResistance)
             .filter(models.DrugResistance.analysis == analysis_record)
             .filter(models.DrugResistance.antibiotic == value)
+            .limit(1)
         )
-        if drug_resistance := (result.scalars().first()):
+        if drug_resistance:
             logger.info(
                 f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name}, Antibiotic {value} already exists{'' if dryrun else ', updating'}"
             )
@@ -195,23 +196,22 @@ async def drugs(
 
 
 async def details(
-    sesion: AsyncSession, gpas_summary: GpasSummary, analysis_record: models.Analysis
+    session: AsyncSession, gpas_summary: GpasSummary, analysis_record: models.Analysis
 ):
-    result = await sesion.execute(select(models.OtherType))
-    other_types = result.scalars().all()
+    other_types = await session.scalars(select(models.OtherType))
     for other_type in other_types:
         value = gpas_summary[other_type.code]
 
-        result = await sesion.execute(
+        other_record: models.Other | None = await session.scalar(
             select(models.Other)
             .filter(models.Other.analysis == analysis_record)
             .filter(models.Other.other_type_code == other_type.code)
+            .limit(1)
         )
-        other_record = result.scalars().first()
 
         if value is None:
             if other_record:
-                await sesion.delete(other_record)
+                await session.delete(other_record)
             continue
 
         if not other_record:
@@ -219,7 +219,7 @@ async def details(
                 analysis=analysis_record,
                 other_type_code=other_type.code,
             )
-            await sesion.add(other_record)
+            session.add(other_record)
 
         other_record["value" + other_type.value_type] = value
 
@@ -288,15 +288,17 @@ async def mutation(
     analysis_record: models.Analysis,
     logger: CustomLogger,
 ) -> models.Mutations | None:
-    result = await session.execute(
+    mut: models.Mutations | None = await session.scalar(
         select(models.Mutations)
         .filter(models.Mutations.analysis == analysis_record)
         .filter(models.Mutations.species == mutation.species)
         .filter(models.Mutations.drug == mutation.drug)
         .filter(models.Mutations.gene == mutation.gene)
         .filter(models.Mutations.mutation == mutation.mutation)
+        .limit(1)
     )
-    if mut := (result.scalars().first()):
+
+    if mut:
         logger.info(
             f"Mutation row {index+2}: Mutation for Batch {mutation.batch}, Sample {mutation.sample_name}, Gene {mutation.gene}, Position {mutation.position} already exists{'' if dryrun else ', updating'}"
         )
