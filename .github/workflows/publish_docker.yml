@@ -24,7 +24,7 @@ jobs:
 
       - name: Extract the version tag
         id: get_version
-        run: echo "::set-output name=VERSION::${GITHUB_REF#refs/tags/}"
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
