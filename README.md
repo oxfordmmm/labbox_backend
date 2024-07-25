@@ -82,22 +82,42 @@ else public. A template `.env.example` is provided as a base to create the
 
 ## Running in docker
 
-~~A `Dockerfile` is provided. If you build the container locally, it will
-contain your `.env`, so the container should not be uploaded to any container
-registry.  GitHub actions are provided to build the container on release and
-copy to GitHub container registry, this will then not contain the `.env` file.~~
-A `.dockerignore` file is now provided that should make this irrelevant.
+A `Dockerfile` is provided to build a container, and also used by the GitHub
+actions to build the container and deploy to ghcr.io.
 
-NOTE if you are running the database on your local machine, you are not able to
-use `localhost` or `127.0.0.1` for the `DATABASE_HOST` entry in the `.env` file.
+If you are running the database on your local machine, you are not able to use
+`localhost` or `127.0.0.1` for the `DATABASE_HOST` entry in the `.env` file.
 Instead use `host.docker.internal` for the `DATABASE_HOST` entry in your `.env`
 file. If you also want the `.env` file to work when running locally, not in a
 docker container, you will need to edit your `hosts` file to point
 `host.docker.internal` at your local machine.
 
+NOTE: `host.docker.internal` works for docker running on Mac and Windows at
+version 20.10 and above. But to get this to work on Linux will need to add
+`--add-host=host.docker.internal:host-gateway` to your `docker` command to
+enable the feature.
+
+To build the container locally for testing use a command similar to the
+following
+
+```shell
+docker build -t labbox_backend .
+```
+
+When testing the docker container with the front-end container use the following
+command to run the back-end container.
+
+```shell
+docker run --env-file ./.env -p 8000:8000 --network labbox_network --name labbox_backend -d labbox_backend
+```
+
+The `-p` is not needed for the containers to communicate, but is useful in
+development to test the API. The `--network` and `--name` are needed for the
+containers to communicate.
+
 ## Debugging into Docker
 
 A `docker-compose.debug.yml` file is provided to allow the running of the
-back-end in a docker container and allow debugging. In VSCode this can be right
-clicked and `compose up` command chosen. A VSCode debugger profile is provided
-"Python: Remote Attach" to attach to the docker container.
+back-end in a docker container and allow debugging. In VSCode this can be
+right-clicked and `compose up` command chosen. A VSCode debugger profile is
+provided "Python: Remote Attach" to attach to the docker container.
