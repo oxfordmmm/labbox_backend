@@ -1,6 +1,8 @@
 import os
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
+
+print("Script is being executed")
 
 
 class Config:
@@ -18,7 +20,9 @@ class Config:
     ]
 
     def __init__(self):
-        load_dotenv()
+        # Explicitly load the .env file
+        load_dotenv(find_dotenv(), override=True, verbose=True)
+        print(find_dotenv())
 
         self.DATABASE_USER = os.environ.get("DATABASE_USER", None)
         self.DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", None)
@@ -32,9 +36,16 @@ class Config:
         self.HOST = os.environ.get("HOST", "localhost:8000")
         self.PORT = os.environ.get("PORT", 8000)
 
-    @property
-    def DATABASE_URL(self):
-        return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+        self.DATABASE_URL = (
+            f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
+            f"@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+        )
+        print(f"DATABASE_URL: {self.DATABASE_URL}")
+
+    # @property
+    # def DATABASE_URL(self):
+    #     print("getting database url")
+    #     return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
 
 
 config = Config()

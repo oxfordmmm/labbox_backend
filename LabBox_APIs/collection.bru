@@ -1,0 +1,26 @@
+headers {
+  Authorization: Bearer {{oauth2_token}}
+}
+
+auth {
+  mode: oauth2
+}
+
+auth:oauth2 {
+  grant_type: authorization_code
+  callback_url: https://labbox.localhost/
+  authorization_url: https://{{process.env.auth0_domain}}/authorize?audience={{process.env.auth0_audience}}
+  access_token_url: https://{{process.env.auth0_domain}}/oauth/token
+  client_id: {{process.env.auth0_client_id}}
+  client_secret: {{process.env.auth0_client_secret}}
+  scope: openid profile email
+  state: sadfasd
+  pkce: false
+}
+
+script:post-response {
+  var token = res.body.access_token;
+  if (token) {
+    bru.setVar('oauth2_token', token)
+  }
+}
