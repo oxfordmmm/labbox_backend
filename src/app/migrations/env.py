@@ -9,12 +9,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 import app.models as models  # noqa: F401
-from app.config import Config
+from app.config import config as app_config
 from app.db import Model
-
-# For some reason the config is not initialised when imported from app.config so
-# we need to initialise it here
-app_config = Config()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -30,6 +26,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
+
+print(app_config.DATABASE_URL)
 
 config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
 

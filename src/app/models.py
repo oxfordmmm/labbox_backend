@@ -1,7 +1,14 @@
 from datetime import date, datetime
 from typing import Dict, List, Optional, get_args
 
-from sqlalchemy import JSON, Enum, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Enum,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableList
@@ -72,6 +79,7 @@ class Specimen(GpasLocalModel):
     collection_date: Mapped[date] = mapped_column(
         default=datetime.utcnow, nullable=False
     )
+    organism: Mapped[str] = mapped_column(String(50), nullable=True, default=None)
     country_sample_taken_code: Mapped[str] = mapped_column(ForeignKey("countries.code"))
     specimen_type: Mapped[str] = mapped_column(String(50), nullable=True)
     specimen_qr_code: Mapped[Text] = mapped_column(Text, nullable=True)
@@ -89,7 +97,15 @@ class Specimen(GpasLocalModel):
         "SpecimenDetail", back_populates="specimen"
     )
 
-    UniqueConstraint(accession, collection_date)
+    __table_args__ = (
+        UniqueConstraint(
+            "accession",
+            "collection_date",
+            "organism",
+            postgresql_nulls_not_distinct=True,
+            name="ux_specimen",
+        ),
+    )
 
 
 class SpecimenDetail(GpasLocalModel):

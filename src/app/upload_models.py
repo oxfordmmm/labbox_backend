@@ -70,6 +70,7 @@ class SamplesImport(ImportModel):
     run_code: ExcelStr = Field(max_length=20)
     accession: ExcelStr = Field(max_length=20)
     collection_date: date
+    organism: Optional[ExcelStr] = Field(None, max_length=50)
     guid: ExcelStr = Field(max_length=64)
     sample_category: Optional[SampleCategory] = None
     nucleic_acid_type: Optional[List[NucleicAcidType]] = None
@@ -98,7 +99,7 @@ class SamplesImport(ImportModel):
             unique_values = list({value.strip() for value in v.split(",")})
             # Validate that each value is a valid NucleicAcidType
             for value in unique_values:
-                if value not in NucleicAcidType.__args__:
+                if value not in NucleicAcidType.__args__:  # type: ignore
                     raise ValueError(f"{value} is not a valid NucleicAcidType value")
             values["nucleic_acid_type"] = unique_values
         return values
@@ -107,6 +108,7 @@ class SamplesImport(ImportModel):
 class StoragesImport(ImportModel):
     accession: ExcelStr = Field(max_length=20)
     collection_date: date
+    organism: Optional[ExcelStr] = Field(None, max_length=50)
     freezer: ExcelStr = Field(max_length=50)
     shelf: ExcelStr = Field(max_length=50)
     rack: ExcelStr = Field(max_length=50)

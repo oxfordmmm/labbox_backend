@@ -2,14 +2,15 @@ import re
 from datetime import date
 from typing import Any, Dict, List
 
-import app.models as models
-from app.logs import CustomLogger
-from app.upload_models import RunImport, SamplesImport, SpecimensImport, StoragesImport
-from app.utils.utils import is_none_or_nan
 from pydantic import ValidationError
 from sqlalchemy import not_, select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+import app.models as models
+from app.logs import CustomLogger
+from app.upload_models import RunImport, SamplesImport, SpecimensImport, StoragesImport
+from app.utils.utils import is_none_or_nan
 
 
 async def import_data(
@@ -111,19 +112,21 @@ async def import_specimens(
                 .filter(
                     models.Specimen.collection_date == specimen_import.collection_date
                 )
+                .filter(models.Specimen.organism == specimen_import.organism)
             )
             if specimen_record:
                 logger.info(
-                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} already exists{'' if dryrun else ', updating'}"
+                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date}, {specimen_import.organism} already exists{'' if dryrun else ', updating'}"
                 )
             else:
                 specimen_record = models.Specimen(
                     accession=specimen_import.accession,
                     collection_date=specimen_import.collection_date,
+                    organism=specimen_import.organism,
                 )
                 session.add(specimen_record)
                 logger.info(
-                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} does not exist{'' if dryrun else ', adding'}"
+                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date}, {specimen_import.organism} does not exist{'' if dryrun else ', adding'}"
                 )
             specimen_record.update_from_importmodel(specimen_import)
             specimen_record.owner = owner_record
@@ -212,7 +215,10 @@ async def import_samples(
 
             run_record = await find_run(session, sample_import.run_code)
             specimen_record = await find_specimen(
-                session, sample_import.accession, sample_import.collection_date
+                session,
+                sample_import.accession,
+                sample_import.collection_date,
+                sample_import.organism,
             )
 
             sample_record: models.Sample | None = await session.scalar(
@@ -260,16 +266,19 @@ async def find_run(session: AsyncSession, run_code: str) -> models.Run:
 
 
 async def find_specimen(
-    session: AsyncSession, accession: str, collection_date: date
+    session: AsyncSession, accession: str, collection_date: date, organism: str | None
 ) -> models.Specimen:
     specimen_record: models.Specimen | None = await session.scalar(
         select(models.Specimen)
         .filter(models.Specimen.accession == accession)
         .filter(models.Specimen.collection_date == collection_date)
+        .filter(models.Specimen.organism == organism)
         .limit(1)
     )
     if not specimen_record:
-        raise ValueError(f"Specimen {accession}, {collection_date} not found")
+        raise ValueError(
+            f"Specimen {accession}, {collection_date}, {organism} not found"
+        )
     return specimen_record
 
 
@@ -377,7 +386,10 @@ async def import_storage(
             storage_import = StoragesImport(**row)
 
             specimen_record = await find_specimen(
-                session, storage_import.accession, storage_import.collection_date
+                session,
+                storage_import.accession,
+                storage_import.collection_date,
+                storage_import.organism,
             )
 
             storage_record: models.Storage | None = await session.scalar(
