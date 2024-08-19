@@ -1,6 +1,6 @@
 import os
 
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
 
 class Config:
@@ -19,7 +19,7 @@ class Config:
 
     def __init__(self):
         # Explicitly load the .env file
-        load_dotenv(find_dotenv(), override=True, verbose=True)
+        load_dotenv()
 
         self.DATABASE_USER = os.environ.get("DATABASE_USER", None)
         self.DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", None)
