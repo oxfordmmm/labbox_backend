@@ -114,7 +114,7 @@ class StoragesImport(ImportModel):
     rack: ExcelStr = Field(max_length=50)
     tray: ExcelStr = Field(max_length=50)
     box: ExcelStr = Field(max_length=50)
-    box_location: ExcelStr = Field(max_length=50, pattern=r"^[A-L](1[0-2]|[1-9])$")
+    box_location: ExcelStr = Field(max_length=50, pattern=r"^[A-T](1[0-9]|20|[1-9])$")
     storage_qr_code: ExcelStr
     date_into_storage: date
     notes: Optional[ExcelStr] = None
