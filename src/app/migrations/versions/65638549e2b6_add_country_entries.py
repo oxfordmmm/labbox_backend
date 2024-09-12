@@ -6,12 +6,11 @@ Create Date: 2024-02-20 09:41:12.442164
 
 """
 
+import csv
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-import csv
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "65638549e2b6"
@@ -27,7 +26,7 @@ def upgrade() -> None:
         for row in reader:
             op.execute(
                 sa.text(
-                    "INSERT INTO countries (code, code2, name, lat, lon) VALUES (:code3, :code2, :Name, :Lat, :Lon)"
+                    "INSERT INTO countries (code, code2, name, lat::FLOAT, lon:FLOAT) VALUES (:code3, :code2, :Name, :Lat, :Lon)"
                 ).bindparams(
                     code3=row["code3"],
                     code2=row["code2"],
