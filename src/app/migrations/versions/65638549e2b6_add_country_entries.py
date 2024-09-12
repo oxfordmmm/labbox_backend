@@ -26,7 +26,7 @@ def upgrade() -> None:
         for row in reader:
             op.execute(
                 sa.text(
-                    "INSERT INTO countries (code, code2, name, lat::FLOAT, lon:FLOAT) VALUES (:code3, :code2, :Name, :Lat, :Lon)"
+                    "INSERT INTO countries (code, code2, name, lat, lon) VALUES (:code3, :code2, :Name, :Lat::FLOAT, :Lon::FLOAT)"
                 ).bindparams(
                     code3=row["code3"],
                     code2=row["code2"],
