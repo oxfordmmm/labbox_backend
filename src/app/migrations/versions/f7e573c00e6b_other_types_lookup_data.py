@@ -8,9 +8,8 @@ Create Date: 2024-03-21 14:11:59.217541
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "f7e573c00e6b"
@@ -60,13 +59,10 @@ other_types_data = [
 def upgrade() -> None:
     for row in other_types_data:
         op.execute(
-            sa.text(
-                "INSERT INTO other_types (code, description, value_type) VALUES (:code, :description, :value_type)"
-            ).bindparams(
-                code=row["code"],
-                description=row["description"],
-                value_type=row["value_type"],
-            )
+            f"""
+            INSERT INTO other_types (code, description, value_type)
+            VALUES ('{row["code"]}', '{row["description"]}', '{row["value_type"]}'::value_type)
+            """
         )
 
 
