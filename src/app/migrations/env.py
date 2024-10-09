@@ -27,8 +27,6 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
 
-print(app_config.DATABASE_URL)
-
 config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
 
 ignored_views = [
