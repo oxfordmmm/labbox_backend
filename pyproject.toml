@@ -43,6 +43,7 @@ dev = [
     "pytest-cov",
     "pytest-postgresql",
     "ruff",
+    "pytest_asyncio",
 ]
 
 [tool.mypy]
