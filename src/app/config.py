@@ -35,7 +35,6 @@ class Config:
 
     @property
     def DATABASE_URL(self):
-        print("getting database url")
         return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
 
 
