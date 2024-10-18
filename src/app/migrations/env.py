@@ -1,12 +1,9 @@
-import ast
 import asyncio
 from logging.config import fileConfig
 
-import astor  # type: ignore
 from alembic import context
-from alembic.script import ScriptDirectory
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 import app.models as models  # noqa: F401
 from app.config import config as app_config
@@ -21,13 +18,13 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
-
-config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
 
 ignored_views = [
     "alembic_version",
@@ -36,17 +33,54 @@ ignored_views = [
     "flattened_others_view",
 ]
 
-sqlalchemy_url = config.get_main_option("sqlalchemy.url")
-if sqlalchemy_url is None:
-    raise ValueError("Database URL must not be None.")
-
-engine: AsyncEngine = create_async_engine(sqlalchemy_url, pool_size=10, max_overflow=20)
-
 
 def include_object(object, name, type_, reflected, compare_to):
     if type_ == "table" and name in ignored_views:
         return False
     return True
+
+
+def run_migrations_online():
+    context.configure(
+        url=config.get_main_option("sqlalchemy.url"),
+        target_metadata=target_metadata,
+        render_as_batch=True,
+        include_object=include_object,
+    )
+    connectable = context.config.attributes.get("connection", None)
+    if connectable is None:
+        config_section = context.config.get_section(context.config.config_ini_section)
+        if config_section is None:
+            raise ValueError("Configuration section not found")
+        connectable = AsyncEngine(
+            engine_from_config(
+                config_section,
+                prefix="sqlalchemy.",
+                poolclass=pool.NullPool,
+                future=True,
+            )
+        )
+
+    if isinstance(connectable, AsyncEngine):
+        asyncio.run(run_async_migrations(connectable))
+    else:
+        do_run_migrations(connectable)
+
+
+async def run_async_migrations(connectable):
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+    await connectable.dispose()
+
+
+def do_run_migrations(connection):
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+    )
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 def run_migrations_offline() -> None:
@@ -72,53 +106,6 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
-
-
-def do_run_migrations(connection: Connection) -> None:
-    """Run sql migrations.
-
-    Args:
-        connection (Connection): The connection string
-    """
-    context.configure(
-        connection=connection,
-        target_metadata=target_metadata,
-        compare_type=True,
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-    head_revision = ScriptDirectory.from_config(config).as_revision_number("head")
-    with open("src/app/__init__.py", "r") as f:
-        tree = ast.parse(f.read())
-
-    for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.AnnAssign)
-            and isinstance(node.target, ast.Name)
-            and node.target.id == "__dbrevision__"
-        ):
-            node.value = ast.Constant(value=head_revision)
-
-    with open("src/app/__init__.py", "w") as f:
-        f.write(astor.to_source(tree))
-
-
-async def run_async_migrations() -> None:
-    """Create an Engine.
-
-    Associate a connection with the context.
-    """
-    async with engine.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await engine.dispose()
-
-
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
