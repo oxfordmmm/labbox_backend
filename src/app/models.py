@@ -1,3 +1,22 @@
+"""
+This module contains the SQLAlchemy models for the LabBox database.
+
+Please note for relationships such as
+
+specimens: Mapped[List["Specimen"]] = relationship(
+        "Specimen", back_populates="country_sample_taken"
+    )
+
+that do not have the lazy parameter set, when using async code you will need to
+specify options in the parent query to load the related data. Either options
+lazy='joined' for eager loading or lazy='selectin' for select-in loading. E.g.
+
+specimen_record: Optional[Specimen] = await db_session.scalar(
+        select(Specimen).options(joinedload(Specimen.details)).filter(Specimen.accession == "asdf1")
+    )
+    
+"""
+
 from datetime import date, datetime
 from typing import Dict, List, Optional, get_args
 
@@ -62,7 +81,7 @@ class Owner(GpasLocalModel):
     site: Mapped[str] = mapped_column(String(50), nullable=False)
     user: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    specimens: Mapped[list["Specimen"]] = relationship(
+    specimens: Mapped[List["Specimen"]] = relationship(
         "Specimen", back_populates="owner"
     )
 
@@ -86,14 +105,14 @@ class Specimen(GpasLocalModel):
     bar_code: Mapped[Text] = mapped_column(Text, nullable=True)
 
     owner: Mapped[Owner] = relationship("Owner", back_populates="specimens")
-    samples: Mapped[list["Sample"]] = relationship("Sample", back_populates="specimen")
-    storages: Mapped[list["Storage"]] = relationship(
+    samples: Mapped[List["Sample"]] = relationship("Sample", back_populates="specimen")
+    storages: Mapped[List["Storage"]] = relationship(
         "Storage", back_populates="specimen"
     )
     country_sample_taken: Mapped["Country"] = relationship(
         "Country", back_populates="specimens"
     )
-    details: Mapped[list["SpecimenDetail"]] = relationship(
+    details: Mapped[List["SpecimenDetail"]] = relationship(
         "SpecimenDetail", back_populates="specimen"
     )
 
@@ -147,7 +166,7 @@ class SpecimenDetailType(GpasLocalModel):
         )
     )
 
-    details: Mapped[list["SpecimenDetail"]] = relationship(
+    details: Mapped[List["SpecimenDetail"]] = relationship(
         "SpecimenDetail", back_populates="specimen_detail_type"
     )
 
@@ -162,7 +181,7 @@ class Country(GpasLocalModel):
     lat: Mapped[float] = mapped_column(nullable=False)
     lon: Mapped[float] = mapped_column(nullable=False)
 
-    specimens: Mapped[list["Specimen"]] = relationship(
+    specimens: Mapped[List["Specimen"]] = relationship(
         "Specimen", back_populates="country_sample_taken"
     )
 
@@ -183,7 +202,7 @@ class Run(GpasLocalModel):
     passed_qc: Mapped[bool] = mapped_column(default=False, nullable=True)
     comment: Mapped[Text] = mapped_column(Text, nullable=True)
 
-    samples: Mapped[list["Sample"]] = relationship("Sample", back_populates="run")
+    samples: Mapped[List["Sample"]] = relationship("Sample", back_populates="run")
 
 
 class Sample(GpasLocalModel):
@@ -219,11 +238,11 @@ class Sample(GpasLocalModel):
 
     run: Mapped["Run"] = relationship("Run", back_populates="samples")
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="samples")
-    details: Mapped[list["SampleDetail"]] = relationship(
+    details: Mapped[List["SampleDetail"]] = relationship(
         "SampleDetail", back_populates="sample"
     )
-    spikes: Mapped[list["Spike"]] = relationship("Spike", back_populates="sample")
-    analyses: Mapped[list["Analysis"]] = relationship(
+    spikes: Mapped[List["Spike"]] = relationship("Spike", back_populates="sample")
+    analyses: Mapped[List["Analysis"]] = relationship(
         "Analysis", back_populates="sample"
     )
 
@@ -303,14 +322,14 @@ class Analysis(GpasLocalModel):
     assay_system: Mapped[str] = mapped_column(String(20))
 
     sample: Mapped["Sample"] = relationship("Sample", back_populates="analyses")
-    speciations: Mapped[list["Speciation"]] = relationship(
+    speciations: Mapped[List["Speciation"]] = relationship(
         "Speciation", back_populates="analysis"
     )
-    others: Mapped[list["Other"]] = relationship("Other", back_populates="analysis")
-    drug_resistances: Mapped[list["DrugResistance"]] = relationship(
+    others: Mapped[List["Other"]] = relationship("Other", back_populates="analysis")
+    drug_resistances: Mapped[List["DrugResistance"]] = relationship(
         "DrugResistance", back_populates="analysis"
     )
-    mutations: Mapped[list["Mutations"]] = relationship(
+    mutations: Mapped[List["Mutations"]] = relationship(
         "Mutations", back_populates="analysis"
     )
 
@@ -329,7 +348,7 @@ class Speciation(GpasLocalModel):
     analysis_date: Mapped[Optional[date]] = mapped_column(
         default=datetime.utcnow, nullable=True
     )
-    data: Mapped[Optional[dict | list]] = mapped_column(type_=JSON, nullable=True)
+    data: Mapped[Optional[Dict | List]] = mapped_column(type_=JSON, nullable=True)
 
     analysis: Mapped["Analysis"] = relationship(
         "Analysis", back_populates="speciations"
@@ -373,7 +392,7 @@ class OtherType(GpasLocalModel):
         )
     )
 
-    others: Mapped[list["Other"]] = relationship("Other", back_populates="other_type")
+    others: Mapped[List["Other"]] = relationship("Other", back_populates="other_type")
 
 
 class DrugResistance(GpasLocalModel):
@@ -404,7 +423,7 @@ class DrugResistanceResultType(GpasLocalModel):
     code: Mapped[str] = mapped_column(String(1), primary_key=True)
     description: Mapped[Text] = mapped_column(Text, nullable=True)
 
-    drug_resistances: Mapped[list["DrugResistance"]] = relationship(
+    drug_resistances: Mapped[List["DrugResistance"]] = relationship(
         "DrugResistance", back_populates="drug_resistance_result_type"
     )
 

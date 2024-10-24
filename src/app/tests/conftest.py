@@ -1,16 +1,15 @@
 from collections.abc import AsyncGenerator
-from datetime import date
 
+import pytest
 import pytest_asyncio  # type: ignore
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
 )
 from sqlalchemy.pool import NullPool
 
-from app import models
 from app.db import migrate_db_tests
+from app.logs import CustomLogger
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -26,49 +25,6 @@ async def db_session(postgresql) -> AsyncGenerator[AsyncSession, None]:
 
     session = AsyncSession(engine)
 
-    async with session.begin():
-        ## Add owners
-        session.add(models.Owner(site="SiteC", user="User3"))
-        session.add(models.Owner(site="blah", user="blah-user"))
-
-        ## add runs
-        session.add(
-            models.Run(
-                code="Run1",
-                site="SiteA",
-                sequencing_method="Illumina",
-                machine="Machine1",
-            )
-        )
-        session.add(
-            models.Run(
-                code="test1",
-                run_date=date.fromisoformat("2024-01-01"),
-                site="Oxford",
-                sequencing_method="Illumina",
-                machine="test_m1",
-                user="blah",
-                number_samples=2,
-                flowcell="fc2",
-                passed_qc=True,
-                comment="test_comment",
-            )
-        )
-
-        ## add specimens
-        owner = (
-            await session.execute(select(models.Owner).limit(1))
-        ).scalar_one_or_none()
-        session.add(
-            models.Specimen(
-                accession="123test",
-                collection_date=date.fromisoformat("2021-01-01"),
-                organism="TestOrganism",
-                country_sample_taken_code="GBR",
-                owner=owner,
-            )
-        )
-
     try:
         yield session
     except:
@@ -77,3 +33,9 @@ async def db_session(postgresql) -> AsyncGenerator[AsyncSession, None]:
     finally:
         await session.close()
         await engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def logger_mock(mocker):
+    """Fixture to create a mock logger."""
+    return mocker.MagicMock(spec=CustomLogger)

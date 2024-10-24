@@ -1,5 +1,4 @@
 import logging
-import os
 from contextlib import asynccontextmanager
 
 from alembic import command
@@ -16,15 +15,17 @@ from app.config import config
 
 logger = logging.getLogger()
 
-# Get the directory of the current file
-current_dir = os.path.dirname(os.path.abspath(__file__))
+alembic_cfg = alembic_config("alembic.ini")
 
-# Construct the path to alembic.ini and env.py
-__config_path__ = os.path.join(current_dir, "../../alembic.ini")
-__migration_path__ = os.path.join(current_dir, "migrations")
+# # Get the directory of the current file
+# current_dir = os.path.dirname(os.path.abspath(__file__))
 
-cfg = alembic_config(__config_path__)
-cfg.set_main_option("script_location", __migration_path__)
+# # Construct the path to alembic.ini and env.py
+# __config_path__ = os.path.join(current_dir, "../../alembic.ini")
+# __migration_path__ = os.path.join(current_dir, "migrations")
+
+# cfg = alembic_config(__config_path__)
+# cfg.set_main_option("script_location", __migration_path__)
 
 
 async def db_revision_ok(session: AsyncSession) -> bool:
@@ -67,7 +68,6 @@ async def get_session():
 
 # this is run synchronously at startup
 def run_alembic_upgrade_to_head():
-    alembic_cfg = alembic_config("alembic.ini")
     try:
         command.upgrade(alembic_cfg, "head")
         logging.info("Alembic upgrade completed successfully.")
@@ -84,5 +84,5 @@ async def migrate_db_tests(conn_url: str):
 
 
 def __execute_upgrade(connection):
-    cfg.attributes["connection"] = connection
-    command.upgrade(cfg, "head")
+    alembic_cfg.attributes["connection"] = connection
+    command.upgrade(alembic_cfg, "head")
