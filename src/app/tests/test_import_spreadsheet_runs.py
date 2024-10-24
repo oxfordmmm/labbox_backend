@@ -13,20 +13,21 @@ from app.tests.import_spreadsheet_testing_data import (
     run_data2,
 )
 
+
 def assert_run_record_matches(run_record: Run, run_entry: Dict[str, Any]):
-        assert run_record.code == run_entry["code"]
-        assert (
-            run_record.run_date
-            == datetime.strptime(run_entry["run_date"], "%Y-%m-%d").date()
-        )
-        assert run_record.site == run_entry["site"]
-        assert run_record.sequencing_method == run_entry["sequencing_method"]
-        assert run_record.machine == run_entry["machine"]
-        assert run_record.user == run_entry["user"]
-        assert run_record.number_samples == run_entry["number_samples"]
-        assert run_record.flowcell == run_entry["flowcell"]
-        assert run_record.passed_qc == run_entry["passed_qc"]
-        assert run_record.comment == run_entry["comment"]
+    assert run_record.code == run_entry["code"]
+    assert (
+        run_record.run_date
+        == datetime.strptime(run_entry["run_date"], "%Y-%m-%d").date()
+    )
+    assert run_record.site == run_entry["site"]
+    assert run_record.sequencing_method == run_entry["sequencing_method"]
+    assert run_record.machine == run_entry["machine"]
+    assert run_record.user == run_entry["user"]
+    assert run_record.number_samples == run_entry["number_samples"]
+    assert run_record.flowcell == run_entry["flowcell"]
+    assert run_record.passed_qc == run_entry["passed_qc"]
+    assert run_record.comment == run_entry["comment"]
 
 
 @pytest.mark.asyncio
@@ -48,7 +49,7 @@ async def test_import_runs_update_insert(
     """
     # intial import
     await import_runs(db_session, run_data, logger_mock, dryrun=True)
-    
+
     result = await db_session.execute(select(Run).order_by(asc(Run.code)))
     run_records = result.scalars().all()
 
@@ -60,7 +61,7 @@ async def test_import_runs_update_insert(
     # Compare the retrieved records to run_data
     for run_record, run_entry in zip(run_records, run_data):
         assert_run_record_matches(run_record, run_entry)
-    
+
     # second import
     await import_runs(db_session, run_data2, logger_mock, dryrun=True)
 

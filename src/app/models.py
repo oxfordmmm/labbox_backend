@@ -14,7 +14,7 @@ lazy='joined' for eager loading or lazy='selectin' for select-in loading. E.g.
 specimen_record: Optional[Specimen] = await db_session.scalar(
         select(Specimen).options(joinedload(Specimen.details)).filter(Specimen.accession == "asdf1")
     )
-    
+
 """
 
 from datetime import date, datetime
