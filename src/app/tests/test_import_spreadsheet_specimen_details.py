@@ -1,9 +1,8 @@
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import pytest
-from sqlalchemy import asc, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import joinedload
+from typing import Optional
 
 from app.importers.import_spreadsheet import import_specimens
 from app.models import Specimen, SpecimenDetail

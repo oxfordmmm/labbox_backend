@@ -174,6 +174,6 @@ specimen_data_details: List[Dict[str, Any]] = [
     },
 ]
 
-smaple_data: List[Dict[str, Any]] = [
+sample_data: List[Dict[str, Any]] = [
     
 ]
