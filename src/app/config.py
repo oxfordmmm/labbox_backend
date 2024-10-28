@@ -24,7 +24,7 @@ class Config:
         self.DATABASE_USER = os.environ.get("DATABASE_USER", None)
         self.DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", None)
         self.DATABASE_HOST = os.environ.get("DATABASE_HOST", None)
-        self.DATABASE_PORT = os.environ.get("DATABASE_PORT", None)
+        self.DATABASE_PORT = os.environ.get("DATABASE_PORT", 5432)
         self.DATABASE_NAME = os.environ.get("DATABASE_NAME", None)
         self.AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", None)
         self.AUTH0_API_AUDIENCE = os.environ.get("AUTH0_API_AUDIENCE", None)
