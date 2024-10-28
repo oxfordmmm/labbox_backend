@@ -17,6 +17,7 @@ async def db_session(postgresql) -> AsyncGenerator[AsyncSession, None]:
     """Fixture to create a database session for testing."""
     
     # Ensure the port is correctly set
+    print(postgresql.info)
     port = postgresql.info.port or 5432
     
     # Create a SQLAlchemy engine using the URL provided by pytest-postgresql
