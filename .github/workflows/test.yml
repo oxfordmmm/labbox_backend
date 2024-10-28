@@ -39,4 +39,4 @@ jobs:
           mypy src/app
       - name: Tests
         run: |
-          pytest -s src/app
+          pytest src/app

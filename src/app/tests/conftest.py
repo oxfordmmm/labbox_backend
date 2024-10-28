@@ -16,12 +16,8 @@ from app.logs import CustomLogger
 async def db_session(postgresql) -> AsyncGenerator[AsyncSession, None]:
     """Fixture to create a database session for testing."""
     
-    # Ensure the port is correctly set
-    print(postgresql.info)
-    port = postgresql.info.port or 5432
-    
     # Create a SQLAlchemy engine using the URL provided by pytest-postgresql
-    connection = f"postgresql+asyncpg://{postgresql.info.user}:@{postgresql.info.host}:{port}/{postgresql.info.dbname}"
+    connection = f"postgresql+asyncpg://{postgresql.info.user}:@{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
 
     # Run the migrations
     await migrate_db_tests(connection)
