@@ -18,10 +18,15 @@ jobs:
         python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v4
-      - name: Install PostgreSQL
+      - name: Add PostgreSQL APT repository
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      - name: Update package list
+        run: sudo apt-get update
+      - name: Install PostgreSQL 16.4
+        run: |
+          sudo apt-get install -y postgresql-16
           sudo service postgresql start
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
