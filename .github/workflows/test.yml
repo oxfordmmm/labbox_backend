@@ -37,6 +37,6 @@ jobs:
       - name: MyPy
         run: |
           mypy src/app
-      # - name: Tests
-      #   run: |
-      #     pytest src/app
+      - name: Tests
+        run: |
+          pytest src/app
