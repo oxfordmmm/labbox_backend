@@ -4,7 +4,8 @@ This is the backend for the LabBox application written using Python and FastAPI.
 
 ## Prerequisites
 
-You will need to have an install of Python 3.12 or greater on you system.
+You will need to have an install of Python 3.12 or greater on you system. For
+PostgreSQL you will version 15 or greater installed.
 
 ## Environment setup
 

@@ -33,6 +33,31 @@
                     "remoteRoot": "/app"
                 }
             ]
-        }
+        },
+        {
+            "name": "Alembic",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "alembic.config",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "upgrade",
+                "head"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "src/app"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        },
     ]
 }
