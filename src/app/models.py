@@ -16,7 +16,8 @@ specimen_record: Optional[Specimen] = await db_session.scalar(
     )
 
 """
-
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 from typing import Dict, List, Optional, get_args
 
@@ -27,6 +28,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -37,6 +39,8 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
     validates,
+    Session,
+    mapper,
 )
 from sqlalchemy_continuum import make_versioned  # type: ignore
 
@@ -49,9 +53,11 @@ from app.constants import (
 )
 from app.db import Model
 from app.upload_models import ImportModel
+from app.utils.auth import auth
 
 make_versioned(user_cls=None)  # type: ignore
 
+executor = ThreadPoolExecutor()
 
 class GpasLocalModel(Model):
     __abstract__ = True
@@ -72,6 +78,40 @@ class GpasLocalModel(Model):
             if hasattr(self, field):
                 self[field] = importmodel[field]
 
+# Define a helper function to run async functions in sync context
+def run_async(coroutine):
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        # Run the coroutine in a separate thread
+        future = executor.submit(asyncio.run, coroutine)
+        return future.result()
+    else:
+        return loop.run_until_complete(coroutine)
+    
+# Define event listeners
+def set_created_by(mapper, connection, target):
+    session = Session.object_session(target)
+    if session:
+        user_email = run_async(auth.get_user_email())
+        target.created_by = user_email
+        target.updated_by = user_email
+        print(f"set_created_by called for {target}")
+
+def set_updated_by(mapper, connection, target):
+    session = Session.object_session(target)
+    if session:
+        user_email = run_async(auth.get_user_email())
+        target.updated_by = user_email
+        print(f"set_updated_by called for {target}")
+
+# Attach event listeners to the base class
+def attach_event_listeners(mapper, class_):
+    if issubclass(class_, GpasLocalModel):
+        event.listen(class_, 'before_insert', set_created_by)
+        event.listen(class_, 'before_update', set_updated_by)
+        print(f"Event listeners attached to {class_}")
+
+event.listen(mapper, 'mapper_configured', attach_event_listeners)
 
 class Owner(GpasLocalModel):
     __versioned__: Dict = {}

@@ -47,6 +47,20 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "AlembicGen",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "alembic.config",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "revision",
+                "--autogenerate",
+                "-m",
+                "test",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Python: Pytest",
             "type": "debugpy",
             "request": "launch",

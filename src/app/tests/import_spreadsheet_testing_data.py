@@ -174,4 +174,23 @@ specimen_data_details: List[Dict[str, Any]] = [
     },
 ]
 
-sample_data: List[Dict[str, Any]] = []
+sample_data: List[Dict[str, Any]] = [
+    {
+        "run_code": "Run1", 
+        "accession": "adfs1",
+        "collection_date": "2024-01-01",
+        "organism": "sponge bob",
+        "guid": "cf6f977e6e",
+        "sample_category": "culture",
+        "nucleic_acid_type": "DNA",
+    },
+    {
+        "run_code": "Run2", 
+        "accession": "adfs2",
+        "collection_date": "2024-01-01",
+        "organism": "square pants",
+        "guid": "52ca5d5b8b",
+        "sample_category": "culture",
+        "nucleic_acid_type": "RNA",
+    },
+]

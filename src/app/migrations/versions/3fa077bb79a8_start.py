@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -40,7 +40,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -72,7 +72,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -84,7 +84,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -103,7 +103,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -115,7 +115,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -143,7 +143,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -155,7 +155,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -188,7 +188,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -200,7 +200,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -224,7 +224,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -236,7 +236,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -270,7 +270,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -282,7 +282,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -310,7 +310,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -322,7 +322,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -350,7 +350,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -362,7 +362,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -392,7 +392,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -404,7 +404,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -429,7 +429,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -441,7 +441,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -481,7 +481,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -493,7 +493,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -526,7 +526,7 @@ def upgrade() -> None:
         sa.Column(
             "created_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(
@@ -538,7 +538,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_by",
             sa.String(length=50),
-            server_default=sa.text("CURRENT_USER"),
+            server_default=sa.text("'system'"),
             nullable=False,
         ),
         sa.Column(

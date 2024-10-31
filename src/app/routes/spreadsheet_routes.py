@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict
 
 from app.db import get_session
 from app.importers.import_spreadsheet import import_data
@@ -17,7 +18,7 @@ async def upload(
     Samples: str = Form(...),
     Storage: str = Form(...),
     dryRun: bool = Form(False),
-    auth_result: str = Security(auth.verify),
+    auth_result: Dict[str, Any] = Security(auth.verify),
 ):
     runs = json.loads(Runs)
     specimens = json.loads(Specimens)

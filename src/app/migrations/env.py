@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, sys, os
 from logging.config import fileConfig
 
 from alembic import context
@@ -6,7 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 import app.models as models  # noqa: F401
-from app.config import config as app_config
+from app.config import app_config
 from app.db import Model
 
 # this is the Alembic Config object, which provides
@@ -26,6 +26,7 @@ config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
 
+
 ignored_views = [
     "alembic_version",
     "flattened_sample_details_view",
@@ -40,7 +41,7 @@ def include_object(object, name, type_, reflected, compare_to):
     return True
 
 
-def run_migrations_online():
+def run_migrations_online():    
     context.configure(
         url=config.get_main_option("sqlalchemy.url"),
         target_metadata=target_metadata,

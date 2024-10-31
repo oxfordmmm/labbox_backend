@@ -76,9 +76,9 @@ class SamplesImport(ImportModel):
     nucleic_acid_type: Optional[List[NucleicAcidType]] = None
     dilution_post_initial_concentration: Optional[bool] = None
     extraction_date: Optional[date] = None
-    extraction_method: Optional[ExcelStr] = Field(max_length=50)
-    extraction_protocol: Optional[ExcelStr] = Field(max_length=50)
-    extraction_user: Optional[ExcelStr] = Field(max_length=50)
+    extraction_method: Optional[ExcelStr] = Field(None, max_length=50)
+    extraction_protocol: Optional[ExcelStr] = Field(None, max_length=50)
+    extraction_user: Optional[ExcelStr] = Field(None, max_length=50)
     illumina_index: Optional[ExcelStr] = Field(None, max_length=50)
     input_volume: Optional[float] = None
     library_pool_concentration: Optional[float] = None

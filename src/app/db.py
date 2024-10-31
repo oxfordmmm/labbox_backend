@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 from app import __dbrevision__
-from app.config import config
+from app.config import app_config
 
 logger = logging.getLogger()
 
@@ -53,7 +53,7 @@ class Model(DeclarativeBase):
 
 @asynccontextmanager
 async def get_session():
-    engine = create_async_engine(config.DATABASE_URL)
+    engine = create_async_engine(app_config.DATABASE_URL)
     session = AsyncSession(engine)
     try:
         yield session

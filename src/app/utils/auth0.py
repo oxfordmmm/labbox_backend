@@ -1,10 +1,10 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, SecurityScopes
 
-from app.config import config
+from app.config import app_config
 
 
 class UnauthorizedException(HTTPException):
@@ -24,7 +24,7 @@ class VerifyToken:
     """Does all the token verification using PyJWT"""
 
     def __init__(self):
-        self.config = config
+        self.config = app_config
 
         # This gets the JWKS from a given URL and does processing so you can
         # use any of the keys available
@@ -35,7 +35,7 @@ class VerifyToken:
         self,
         security_scopes: SecurityScopes,
         token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer()),
-    ):
+    ) -> Dict[str, Any]:
         if token is None:
             raise UnauthenticatedException
 
@@ -66,3 +66,12 @@ class VerifyToken:
                 raise UnauthorizedException(detail=f'Missing "{permission}" permission')
 
         return payload
+    
+    async def get_user_email(
+        self,
+        auth_result: Dict[str, Any] = Depends(verify),
+    ) -> str:
+        email = auth_result.get("email")
+        if email is None:
+            raise UnauthorizedException("Email not found in token")
+        return email

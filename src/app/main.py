@@ -1,13 +1,14 @@
 import logging
 from os import cpu_count
 from pathlib import Path
+from typing import Any, Dict
 
 import uvicorn
 from fastapi import FastAPI, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from app.config import config
+from app.config import app_config
 from app.db import run_alembic_upgrade_to_head
 from app.logs import add_json_handler
 from app.routes.mutation_routes import router as mutation_router
@@ -69,7 +70,7 @@ async def favicon() -> FileResponse:
 
 
 @app.get("/private")
-async def private(auth_result: str = Security(auth.verify)) -> str:
+async def private(auth_result: Dict[str, Any] = Security(auth.verify)) -> Dict[str, Any]:
     """Protected test end point that requires authentication
 
     Args:
@@ -83,8 +84,8 @@ async def private(auth_result: str = Security(auth.verify)) -> str:
 
 @app.get("/private-scoped")
 def private_scoped(
-    auth_result: str = Security(auth.verify, scopes=["admin"]),
-) -> str:
+    auth_result: Dict[str, Any] = Security(auth.verify, scopes=["admin"]),
+) -> Dict[str, Any]:
     """A protected endpoint that requires a valid token with the 'admin' scope
 
     Args:
@@ -138,8 +139,8 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "main:app",
-        host=config.HOST,
-        port=int(config.PORT),
+        host=app_config.HOST,
+        port=int(app_config.PORT),
         log_level="info",
         workers=worker_count,
     )

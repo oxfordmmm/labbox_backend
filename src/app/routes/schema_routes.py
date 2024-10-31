@@ -66,7 +66,7 @@ async def get_view_schema(view_name: str) -> Dict[str, Any]:
 @router.get("/{view_name}")
 async def get_schema(
     view_name: str,
-    auth_result: str = Security(auth.verify),
+    auth_result: Dict[str, Any] = Security(auth.verify),
 ):
     if view_name not in allowed_view_names:
         return {"error": "Invalid view name"}

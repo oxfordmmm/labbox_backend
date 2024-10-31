@@ -13,7 +13,7 @@ db_timestamp = Annotated[
 
 db_user = Annotated[
     str,
-    mapped_column(String(50), server_default=text("CURRENT_USER"), nullable=False),
+    mapped_column(String(50), server_default=text("'system'"), nullable=False),
 ]
 
 ValueType = Literal["str", "int", "float", "bool", "date", "text"]

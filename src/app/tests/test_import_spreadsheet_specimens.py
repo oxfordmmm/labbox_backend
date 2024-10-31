@@ -45,9 +45,10 @@ def assert_specimen_record_matches(
 async def test_import_specimens_update_insert(db_session: AsyncSession, logger_mock):
     """Test the import_specimens function when updating and inserting specimens.
 
-    This test ensures that the import_specimens function correctly inserts and updates the
-    specimen_data into the database and verifies the imported records against the expected
-    combined_specimen_data. It also checks that the logger is called with the expected messages.
+    This test ensures that the import_specimens function correctly inserts and
+    updates the specimen_data into the database and verifies the imported
+    records against the expected combined_specimen_data. It also checks that the
+    logger is called with the expected messages.
 
     Args:
         db_session (AsyncSession): The database session fixture.

@@ -40,7 +40,6 @@ def upgrade() -> None:
     CREATE OR REPLACE FUNCTION update_change_columns()
     RETURNS TRIGGER AS $$
     BEGIN
-        NEW.updated_by = CURRENT_USER; 
         NEW.updated_at = NOW();
         RETURN NEW;
     END;

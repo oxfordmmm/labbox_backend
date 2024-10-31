@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict
 
 from app.db import get_session
 from app.importers.import_gpas import import_summary
@@ -15,7 +16,7 @@ async def upload(
     Summary: str = Form(...),
     Mapping: str = Form(...),
     dryRun: bool = Form(False),
-    auth_result: str = Security(auth.verify),
+    auth_result: Dict[str, Any] = Security(auth.verify),
 ):
     summary = json.loads(Summary)
     mapping = json.loads(Mapping)
