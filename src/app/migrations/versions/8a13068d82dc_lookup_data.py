@@ -10,7 +10,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "8a13068d82dc"
 down_revision: Union[str, None] = "9914ba1a02f5"
@@ -126,15 +125,17 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    for row in sample_detail_types_data:
-        op.execute(
-            f"""
-            DELETE FROM sample_detail_types WHERE code = '{row["code"]}'
-            """
-        )
-    for row in drug_resistance_result_types_data:
-        op.execute(
-            f"""
-            DELETE FROM drug_resistance_result_types WHERE code = '{row["code"]}'
-            """
-        )
+    # don't delete the data as it may be referenced in other tables
+    # for row in sample_detail_types_data:
+    #     op.execute(
+    #         f"""
+    #         DELETE FROM sample_detail_types WHERE code = '{row["code"]}'
+    #         """
+    #     )
+    # for row in drug_resistance_result_types_data:
+    #     op.execute(
+    #         f"""
+    #         DELETE FROM drug_resistance_result_types WHERE code = '{row["code"]}'
+    #         """
+    #     )
+    pass

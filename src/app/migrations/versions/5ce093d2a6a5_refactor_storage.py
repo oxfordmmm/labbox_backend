@@ -8,9 +8,8 @@ Create Date: 2024-03-13 11:21:31.934900
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "5ce093d2a6a5"
@@ -103,7 +102,11 @@ def downgrade() -> None:
     with op.batch_alter_table("storages", schema=None) as batch_op:
         batch_op.add_column(
             sa.Column(
-                "freezer_id", sa.VARCHAR(length=20), autoincrement=False, nullable=False
+                "freezer_id",
+                sa.VARCHAR(length=20),
+                autoincrement=False,
+                nullable=False,
+                server_default=sa.text("'default_value'"),
             )
         )
         batch_op.add_column(
@@ -112,6 +115,7 @@ def downgrade() -> None:
                 sa.VARCHAR(length=20),
                 autoincrement=False,
                 nullable=False,
+                server_default=sa.text("'default_value'"),
             )
         )
         batch_op.add_column(
@@ -120,6 +124,7 @@ def downgrade() -> None:
                 sa.VARCHAR(length=20),
                 autoincrement=False,
                 nullable=False,
+                server_default=sa.text("'default_value'"),
             )
         )
         batch_op.drop_column("notes")

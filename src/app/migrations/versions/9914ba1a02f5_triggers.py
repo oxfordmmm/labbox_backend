@@ -10,7 +10,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "9914ba1a02f5"
 down_revision: Union[str, None] = "3fa077bb79a8"
@@ -60,7 +59,7 @@ def downgrade() -> None:
     for table in tables:
         op.execute(
             f"""
-        DROP TRIGGER before_update_trigger_{table};
+        DROP TRIGGER before_update_trigger_{table} on {table};
         """
         )
     op.execute(

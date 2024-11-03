@@ -10,7 +10,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "74f145bf0bdc"
 down_revision: Union[str, None] = "fa75ffba1cf6"
@@ -78,9 +77,24 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute(
         """
-    DROP TRIGGER update_flattened_specimen_details_view_trigger ON samples;
+    DROP TRIGGER update_flattened_specimen_details_view_trigger ON specimen_detail_types;
+    """
+    )
+
+    op.execute(
+        """
     DROP FUNCTION update_flattened_specimen_details_view();
+    """
+    )
+
+    op.execute(
+        """
     DROP VIEW flattened_specimen_details_view;
+    """
+    )
+
+    op.execute(
+        """
     DROP FUNCTION create_flattened_specimen_details_view();
     """
     )

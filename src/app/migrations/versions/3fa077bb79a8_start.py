@@ -8,8 +8,8 @@ Create Date: 2024-01-26 11:01:14.003384
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
@@ -575,4 +575,24 @@ def downgrade() -> None:
     op.drop_table("owners")
     op.drop_table("other_types")
     op.drop_table("drug_resistance_result_types")
+
+    # Drop the type if it exists
+    op.execute("""
+    DO $$ 
+    BEGIN
+        IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'value_type') THEN
+            DROP TYPE value_type;
+        END IF;
+    END $$;
+    """)
+
+    # Drop the type if it exists
+    op.execute("""
+    DO $$ 
+    BEGIN
+        IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sample_category') THEN
+            DROP TYPE sample_category;
+        END IF;
+    END $$;
+    """)
     # ### end Alembic commands ###
